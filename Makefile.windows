@@ -1,0 +1,167 @@
+CXX            = cl
+LINKER         = link
+AR             = lib
+AR_OPTIONS     = /nologo
+
+# Compiler Flags
+
+GENERAL_FLAGS  = /nologo /sdl /Gd /FC
+ABI_FLAGS      = /MD /EHsc /GS /Gy /Gm-
+LANG_FLAGS     = /GR /Zc:forScope /Zc:inline /Zc:wchar_t /permissive- 
+OPT_FLAGS      = /O2 /Ot /Oi /Oy
+WARN_FLAGS     = /W3 /WX- /wd4197
+LDFLAGS        =
+
+# Path to OpenSSL static library and development headers
+OPENSSL_PATH   = ..\openssl
+OPENSSL_INC    = $(OPENSSL_PATH)\include
+OPENSSL_LIB    = $(OPENSSL_PATH)\lib\libeay32.lib
+
+EXE_LINK_CMD   = $(LINKER)
+POST_LINK_CMD  = 
+
+LIB_LINKS_TO   = user32.lib ws2_32.lib
+TEST_LIB_DEP   = gdi32.lib
+EXE_LINKS_TO   = lib\bdap.lib $(LIB_LINKS_TO)
+
+BUILD_FLAGS    = $(GENERAL_FLAGS) $(ABI_FLAGS) $(LANG_FLAGS) $(OPT_FLAGS) $(WARN_FLAGS)
+
+# The primary target
+all: create_dirs libs tests
+
+# Executable targets
+TESTS          = bin\tests.exe
+BDAP_TEST      = bin\bdap_test.exe
+BDAP_LIB       = lib\bdap.lib
+
+tests: $(TESTS) $(BDAP_TEST)
+libs: $(BDAP_LIB)
+
+# Misc targets
+
+run: create_dirs $(TESTS) $(BDAP_TEST)
+	@echo Executing BDAP component tests ... 
+	@$(TESTS)
+	@echo off
+	@echo.
+	@echo on
+	@echo Executing BDAP positive and negative tests
+	@$(BDAP_TEST)
+
+# create output directories
+create_dirs:
+	@if not exist bin mkdir bin
+	@if not exist lib mkdir lib
+	@if not exist obj mkdir obj
+
+# delete output directories
+clean:
+	@if exist bin rmdir /S /Q bin
+	@if exist lib rmdir /S /Q lib
+	@if exist obj rmdir /S /Q obj
+
+# Object Files
+LIBOBJS = obj\aes256.obj obj\aes256ctr.obj obj\aes256gcm.obj \
+	obj\bdap.obj obj\bdap_core.obj obj\bdap_error.obj obj\curve25519.obj \
+	obj\ed25519.obj obj\fe.obj obj\ge.obj obj\os_rand.obj obj\rand.obj \
+	obj\sha512.obj obj\shake256.obj obj\shake256_rand.obj obj\utils.obj
+
+BDAP_TESTOBJS = obj\bdap_test.obj
+
+TESTOBJS = obj\aes256_test.obj obj\aes256ctr_test.obj obj\aes256gcm_test.obj \
+	obj\bdap_core_test.obj obj\curve25519_test.obj obj\convert_test.obj \
+	obj\shake256_test.obj obj\test.obj
+
+# Executable targets
+
+$(BDAP_TEST): $(BDAP_LIB) $(BDAP_TESTOBJS)
+	@$(EXE_LINK_CMD) $(LDFLAGS) $(BDAP_TESTOBJS) $(EXE_LINKS_TO) /OUT:$@
+	@$(POST_LINK_CMD)
+
+$(TESTS): $(BDAP_LIB) $(TESTOBJS)
+	@$(EXE_LINK_CMD) $(LDFLAGS) $(TESTOBJS) $(EXE_LINKS_TO) $(TEST_LIB_DEP) $(OPENSSL_LIB) /OUT:$@
+	@$(POST_LINK_CMD)
+
+# Library targets
+
+lib\bdap.lib: $(LIBOBJS)
+	@$(AR) $(LIBOBJS) /OUT:$@
+
+# Build Commands
+
+obj\aes256.obj: src/aes256.c include/aes256.h include/utils.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/aes256.c /Fo$@
+
+obj\aes256ctr.obj: src/aes256ctr.c include/aes256ctr.h include/aes256.h include/utils.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/aes256ctr.c /Fo$@
+
+obj\aes256gcm.obj: src/aes256gcm.c include/aes256gcm.h include/aes256.h include/utils.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/aes256gcm.c /Fo$@
+
+obj\bdap.obj: src/bdap.cpp include/bdap.h include/bdap_core.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/bdap.cpp /Fo$@
+
+obj\bdap_core.obj: src/bdap_core.c include/aes256ctr.h include/aes256gcm.h include/bdap_core.h include/bdap_error.h include/curve25519.h include/ed25519.h include/rand.h include/shake256.h include/utils.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/bdap_core.c /Fo$@
+
+obj\bdap_error.obj: src/bdap_error.c include/bdap_error.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/bdap_error.c /Fo$@
+
+obj\curve25519.obj: src/curve25519.c include/curve25519.h include/fe.h include/rand.h include/utils.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/curve25519.c /Fo$@
+
+obj\ed25519.obj: src/ed25519.c include/ed25519.h include/curve25519.h include/ge.h include/rand.h include/sha512.h include/utils.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/ed25519.c /Fo$@
+
+obj\fe.obj: src/fe.c include/fe.h include/utils.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/fe.c /Fo$@
+
+obj\ge.obj: src/ge.c include/ge.h include/fe_25_5.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/ge.c /Fo$@
+
+obj\os_rand.obj: src/os_rand.c include/os_rand.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/os_rand.c /Fo$@
+
+obj\rand.obj: src/rand.c include/rand.h include/os_rand.h include/shake256_rand.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/rand.c /Fo$@
+
+obj\sha512.obj: src/sha512.c include/sha512.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/sha512.c /Fo$@
+
+obj\shake256.obj: src/shake256.c include/shake256.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/shake256.c /Fo$@
+
+obj\shake256_rand.obj: src/shake256_rand.c include/shake256_rand.h include/shake256.h include/utils.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/shake256_rand.c /Fo$@
+
+obj\utils.obj: src/utils.c include/utils.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/utils.c /Fo$@
+
+# BDAP test source code
+obj\bdap_test.obj: test/bdap_test.cpp include/aes256ctr.h include/aes256gcm.h include/bdap.h include/bdap_error.h include/curve25519.h include/ed25519.h include/rand.h include/shake256.h include/utils.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c test/bdap_test.cpp /Fo$@
+
+# Additional test source code
+obj\aes256_test.obj: test/aes256_test.c include/aes256.h include/rand.h include/utils.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /I$(OPENSSL_INC) /nologo /c test/aes256_test.c /Fo$@
+
+obj\aes256ctr_test.obj: test/aes256ctr_test.c include/aes256ctr.h include/rand.h include/utils.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /I$(OPENSSL_INC) /nologo /c test/aes256ctr_test.c /Fo$@
+
+obj\aes256gcm_test.obj: test/aes256gcm_test.c include/aes256gcm.h include/utils.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /I$(OPENSSL_INC) /nologo /c test/aes256gcm_test.c /Fo$@
+
+obj\bdap_core_test.obj: test/bdap_core_test.c include/bdap_core.h include/curve25519.h include/ed25519.h include/rand.h include/utils.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /I$(OPENSSL_INC) /nologo /c test/bdap_core_test.c /Fo$@
+
+obj\curve25519_test.obj: test/curve25519_test.c include/curve25519.h include/rand.h include/utils.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /I$(OPENSSL_INC) /nologo /c test/curve25519_test.c /Fo$@
+	
+obj\convert_test.obj: test/convert_test.c include/curve25519.h include/ed25519.h include/utils.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /I$(OPENSSL_INC) /nologo /c test/convert_test.c /Fo$@
+
+obj\shake256_test.obj: test/shake256_test.c include/shake256_rand.h include/utils.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /I$(OPENSSL_INC) /nologo /c test/shake256_test.c /Fo$@
+
+obj\test.obj: test/test.c include/shake256_rand.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /I$(OPENSSL_INC) /nologo /c test/test.c /Fo$@
