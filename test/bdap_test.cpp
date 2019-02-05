@@ -53,7 +53,7 @@ bool randomPositiveTest()
     //    EncryptBDAPData returns true and strErrorMessage is empty.
     bool encryptStatus = false;
     std::string strErrorMessage("N/A");
-    CharVector vchCipherText(BDAPCiphertextSize(kNumberOfKeys, vchDataLength));
+    CharVector vchCipherText;
     encryptStatus = EncryptBDAPData(vchPubKeys, vchData, vchCipherText, strErrorMessage);
     assert(encryptStatus == true);
     assert(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])));
@@ -65,7 +65,7 @@ bool randomPositiveTest()
     for (index = 0; index < kNumberOfKeys; ++index)
     {
         strErrorMessage = "N/A";
-        CharVector vchDecrypted(BDAPExpectedDecryptedSize(vchCipherText));
+        CharVector vchDecrypted;
         bool decryptStatus = DecryptBDAPData(vchPrivKeySeeds[index], vchCipherText, vchDecrypted, strErrorMessage);
         assert(decryptStatus == true);
         assert(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])));
@@ -304,7 +304,7 @@ bool hardCodedPositiveTest()
     //    EncryptBDAPData returns true and strErrorMessage is empty.
     bool encryptStatus = false;
     std::string strErrorMessage("N/A");
-    CharVector vchCipherText(BDAPCiphertextSize(uint16_t(vchPubKeys.size()), vchData.size()));
+    CharVector vchCipherText;
     encryptStatus = EncryptBDAPData(vchPubKeys, vchData, vchCipherText, strErrorMessage);
     assert(encryptStatus == true);
     assert(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])));
@@ -316,7 +316,7 @@ bool hardCodedPositiveTest()
     for (index = 0; index < vchPubKeys.size(); ++index)
     {
         strErrorMessage = "N/A";
-        CharVector vchDecrypted(BDAPExpectedDecryptedSize(vchCipherText));
+        CharVector vchDecrypted;
         bool decryptStatus = DecryptBDAPData(vchPrivKeySeeds[index], vchCipherText, vchDecrypted, strErrorMessage);
         assert(decryptStatus == true);
         assert(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])));
@@ -352,7 +352,7 @@ bool randomNegativeTest()
     //    EncryptBDAPData returns true.
     bool encryptStatus = false;
     std::string strErrorMessage("N/A");
-    CharVector vchCipherText(BDAPCiphertextSize(kNumberOfKeys, vchDataLength));
+    CharVector vchCipherText;
     encryptStatus = EncryptBDAPData(vchPubKeys, vchData, vchCipherText, strErrorMessage);
     assert(encryptStatus == true);
 
@@ -367,7 +367,7 @@ bool randomNegativeTest()
         bdap_randombytes(vchPrivKeySeed.data(), ED25519_PRIVATE_KEY_SEED_SIZE);
 
         std::string strErrorMessage("");
-        CharVector vchDecryptedData(BDAPExpectedDecryptedSize(vchCipherText));
+        CharVector vchDecryptedData;
         if (false == DecryptBDAPData(vchPrivKeySeed, vchCipherText, vchDecryptedData, strErrorMessage)
                     && strErrorMessage.size() > 0)
         {
@@ -411,7 +411,7 @@ bool decryptLastValueNegativeTest()
     //    EncryptBDAPData returns true and strErrorMessage is empty.
     bool encryptStatus = false;
     std::string strErrorMessage("N/A");
-    CharVector vchCipherText(BDAPCiphertextSize(kNumberOfKeys, vchDataLength));
+    CharVector vchCipherText;
     encryptStatus = EncryptBDAPData(vchPubKeys, vchData, vchCipherText, strErrorMessage);
     assert(encryptStatus == true);
     assert(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])));
