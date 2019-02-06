@@ -1,8 +1,8 @@
 // Copyright (c) 2018-2019 Duality Blockchain Solutions Developers
 // See LICENSE.md file for license, copying and use information.
 
-#ifndef _BDAP_ERROR_H
-#define _BDAP_ERROR_H
+#ifndef _ENCRYPTION_ERROR_H
+#define _ENCRYPTION_ERROR_H
 
 #define BDAP_SUCCESS                                0
 #define BDAP_UNKNOWN_ERROR                          1
@@ -39,4 +39,4 @@ extern const char* bdap_error_message[];
 }
 #endif
 
-#endif
+#endif // _ENCRYPTION_ERROR_H

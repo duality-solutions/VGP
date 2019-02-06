@@ -1,8 +1,8 @@
 // Copyright (c) 2018-2019 Duality Blockchain Solutions Developers
 // See LICENSE.md file for license, copying and use information.
 
-#ifndef _BDAP_H
-#define _BDAP_H
+#ifndef _ENCRYPTION_H
+#define _ENCRYPTION_H
 
 #include <string>
 #include <vector>
@@ -59,4 +59,4 @@ bool DecryptBDAPData(const CharVector& vchPrivKeySeed,
                      CharVector& vchData,
                      std::string& strErrorMessage);
 
-#endif
+#endif // _ENCRYPTION_H

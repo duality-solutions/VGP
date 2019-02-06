@@ -1,8 +1,8 @@
 // Copyright (c) 2018-2019 Duality Blockchain Solutions Developers
 // See LICENSE.md file for license, copying and use information.
 
-#ifndef _BDAP_CORE_H
-#define _BDAP_CORE_H
+#ifndef _ENCRYPTION_CORE_H
+#define _ENCRYPTION_CORE_H
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -108,4 +108,4 @@ bool bdap_decrypt(uint8_t* plaintext,
 }
 #endif
 
-#endif
+#endif // _ENCRYPTION_CORE_H
