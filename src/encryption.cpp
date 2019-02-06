@@ -1,6 +1,6 @@
 #include <cstdint>
-#include "bdap_core.h"
-#include "bdap.h"
+#include "encryption_core.h"
+#include "encryption.h"
 
 /**
  * @brief Returns the size of BDAP ciphertext in bytes for given number of recipients

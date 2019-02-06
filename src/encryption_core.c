@@ -1,6 +1,6 @@
 #include <string.h>
-#include "bdap_core.h"
-#include "bdap_error.h"
+#include "encryption_core.h"
+#include "encryption_error.h"
 #include "ed25519.h"
 #include "curve25519.h"
 #include "aes256ctr.h"

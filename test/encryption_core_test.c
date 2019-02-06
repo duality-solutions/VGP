@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "rand.h"
-#include "bdap_core.h"
+#include "encryption_core.h"
 #include "ed25519.h"
 #include "curve25519.h"
 #include "utils.h"

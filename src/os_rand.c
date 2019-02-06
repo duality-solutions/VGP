@@ -6,7 +6,9 @@
 # include <stdbool.h>
 # include <stdio.h>
 #elif defined(__linux__)
-#  define _GNU_SOURCE
+# if !defined(_GNU_SOURCE)
+ #  define _GNU_SOURCE
+# endif /* _GNU_SOURCE */
 # include <unistd.h>
 # include <sys/syscall.h>
 # if !defined(SYS_getrandom)
