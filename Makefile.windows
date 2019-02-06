@@ -22,7 +22,7 @@ POST_LINK_CMD  =
 
 LIB_LINKS_TO   = user32.lib ws2_32.lib
 TEST_LIB_DEP   = gdi32.lib
-EXE_LINKS_TO   = lib\bdap.lib $(LIB_LINKS_TO)
+EXE_LINKS_TO   = lib\bdap_encryption.lib $(LIB_LINKS_TO)
 
 BUILD_FLAGS    = $(GENERAL_FLAGS) $(ABI_FLAGS) $(LANG_FLAGS) $(OPT_FLAGS) $(WARN_FLAGS)
 
@@ -31,8 +31,8 @@ all: create_dirs libs tests
 
 # Executable targets
 TESTS          = bin\tests.exe
-BDAP_TEST      = bin\bdap_test.exe
-BDAP_LIB       = lib\bdap.lib
+BDAP_TEST      = bin\bdap_encryption_test.exe
+BDAP_LIB       = lib\bdap_encryption.lib
 
 tests: $(TESTS) $(BDAP_TEST)
 libs: $(BDAP_LIB)
@@ -62,14 +62,14 @@ clean:
 
 # Object Files
 LIBOBJS = obj\aes256.obj obj\aes256ctr.obj obj\aes256gcm.obj \
-	obj\bdap.obj obj\bdap_core.obj obj\bdap_error.obj obj\curve25519.obj \
+	obj\.obj obj\encryption_core.obj obj\encryption_error.obj obj\curve25519.obj \
 	obj\ed25519.obj obj\fe.obj obj\ge.obj obj\os_rand.obj obj\rand.obj \
 	obj\sha512.obj obj\shake256.obj obj\shake256_rand.obj obj\utils.obj
 
-BDAP_TESTOBJS = obj\bdap_test.obj
+BDAP_TESTOBJS = obj\encryption_test.obj
 
 TESTOBJS = obj\aes256_test.obj obj\aes256ctr_test.obj obj\aes256gcm_test.obj \
-	obj\bdap_core_test.obj obj\curve25519_test.obj obj\convert_test.obj \
+	obj\encryption_core_test.obj obj\curve25519_test.obj obj\convert_test.obj \
 	obj\shake256_test.obj obj\test.obj
 
 # Executable targets
@@ -84,7 +84,7 @@ $(TESTS): $(BDAP_LIB) $(TESTOBJS)
 
 # Library targets
 
-lib\bdap.lib: $(LIBOBJS)
+lib\bdap_encryption.lib: $(LIBOBJS)
 	@$(AR) $(LIBOBJS) /OUT:$@
 
 # Build Commands
@@ -98,14 +98,14 @@ obj\aes256ctr.obj: src/aes256ctr.c include/aes256ctr.h include/aes256.h include/
 obj\aes256gcm.obj: src/aes256gcm.c include/aes256gcm.h include/aes256.h include/utils.h
 	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/aes256gcm.c /Fo$@
 
-obj\bdap.obj: src/bdap.cpp include/bdap.h include/bdap_core.h
-	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/bdap.cpp /Fo$@
+obj\encryption.obj: src/encryption.cpp include/encryption.h include/encryption_core.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/encryption.cpp /Fo$@
 
-obj\bdap_core.obj: src/bdap_core.c include/aes256ctr.h include/aes256gcm.h include/bdap_core.h include/bdap_error.h include/curve25519.h include/ed25519.h include/rand.h include/shake256.h include/utils.h
-	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/bdap_core.c /Fo$@
+obj\encryption_core.obj: src/encryption_core.c include/aes256ctr.h include/aes256gcm.h include/encryption_core.h include/encryption_error.h include/curve25519.h include/ed25519.h include/rand.h include/shake256.h include/utils.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/encryption_core.c /Fo$@
 
-obj\bdap_error.obj: src/bdap_error.c include/bdap_error.h
-	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/bdap_error.c /Fo$@
+obj\encryption_error.obj: src/encryption_error.c include/encryption_error.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/encryption_error.c /Fo$@
 
 obj\curve25519.obj: src/curve25519.c include/curve25519.h include/fe.h include/rand.h include/utils.h
 	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/curve25519.c /Fo$@
@@ -138,8 +138,8 @@ obj\utils.obj: src/utils.c include/utils.h
 	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/utils.c /Fo$@
 
 # BDAP test source code
-obj\bdap_test.obj: test/bdap_test.cpp include/aes256ctr.h include/aes256gcm.h include/bdap.h include/bdap_error.h include/curve25519.h include/ed25519.h include/rand.h include/shake256.h include/utils.h
-	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c test/bdap_test.cpp /Fo$@
+obj\encryption_test.obj: test/encryption_test.cpp include/aes256ctr.h include/aes256gcm.h include/encryption.h include/encryption_error.h include/curve25519.h include/ed25519.h include/rand.h include/shake256.h include/utils.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c test/encryption_test.cpp /Fo$@
 
 # Additional test source code
 obj\aes256_test.obj: test/aes256_test.c include/aes256.h include/rand.h include/utils.h
@@ -151,8 +151,8 @@ obj\aes256ctr_test.obj: test/aes256ctr_test.c include/aes256ctr.h include/rand.h
 obj\aes256gcm_test.obj: test/aes256gcm_test.c include/aes256gcm.h include/utils.h
 	@$(CXX) $(BUILD_FLAGS) /Iinclude /I$(OPENSSL_INC) /nologo /c test/aes256gcm_test.c /Fo$@
 
-obj\bdap_core_test.obj: test/bdap_core_test.c include/bdap_core.h include/curve25519.h include/ed25519.h include/rand.h include/utils.h
-	@$(CXX) $(BUILD_FLAGS) /Iinclude /I$(OPENSSL_INC) /nologo /c test/bdap_core_test.c /Fo$@
+obj\encryption_core_test.obj: test/encryption_core_test.c include/encryption_core.h include/curve25519.h include/ed25519.h include/rand.h include/utils.h
+	@$(CXX) $(BUILD_FLAGS) /Iinclude /I$(OPENSSL_INC) /nologo /c test/encryption_core_test.c /Fo$@
 
 obj\curve25519_test.obj: test/curve25519_test.c include/curve25519.h include/rand.h include/utils.h
 	@$(CXX) $(BUILD_FLAGS) /Iinclude /I$(OPENSSL_INC) /nologo /c test/curve25519_test.c /Fo$@
