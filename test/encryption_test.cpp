@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <cstring>
 #include <cassert>
-#include "bdap.h"
+#include "encryption.h"
 #include "rand.h"
 #include "ed25519.h"
 #include "curve25519.h"
@@ -12,7 +12,7 @@
 #include "aes256ctr.h"
 #include "aes256gcm.h"
 #include "utils.h"
-#include "bdap_error.h"
+#include "encryption_error.h"
 
 #define DO_TEST(name, func)   \
     std::cout << name << std::flush; \

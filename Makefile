@@ -35,8 +35,8 @@ all: create_dirs libs tests
 
 # Executable targets
 TESTS          = bin/tests
-BDAP_TEST      = bin/bdap_test
-BDAP_LIB       = lib/libbdap.a
+BDAP_TEST      = bin/encryption_test
+BDAP_LIB       = lib/lib_bdap_encryption.a
 
 tests: $(TESTS) $(BDAP_TEST)
 libs: $(BDAP_LIB)
@@ -62,14 +62,14 @@ clean:
 
 # Object Files
 LIBOBJS = obj/aes256.obj obj/aes256ctr.obj obj/aes256gcm.obj \
-	obj/bdap.obj obj/bdap_core.obj obj/bdap_error.obj obj/curve25519.obj \
+	obj/encryption.obj obj/encryption_core.obj obj/encryption_error.obj obj/curve25519.obj \
 	obj/ed25519.obj obj/fe.obj obj/ge.obj obj/os_rand.obj obj/rand.obj \
 	obj/sha512.obj obj/shake256.obj obj/shake256_rand.obj obj/utils.obj
 
-BDAP_TESTOBJS = obj/bdap_test.obj
+BDAP_TESTOBJS = obj/encryption_test.obj
 
 TESTOBJS = obj/aes256_test.obj obj/aes256ctr_test.obj obj/aes256gcm_test.obj \
-	obj/bdap_core_test.obj obj/curve25519_test.obj obj/convert_test.obj \
+	obj/encryption_core_test.obj obj/curve25519_test.obj obj/convert_test.obj \
 	obj/shake256_test.obj obj/test.obj
 
 # Executable targets
@@ -96,14 +96,14 @@ obj/aes256ctr.obj: src/aes256ctr.c include/aes256ctr.h include/aes256.h include/
 obj/aes256gcm.obj: src/aes256gcm.c include/aes256gcm.h include/aes256.h include/utils.h
 	$(CC) $(C_BUILD_FLAGS) src/aes256gcm.c -o $@
 
-obj/bdap.obj: src/bdap.cpp include/bdap.h include/bdap_core.h
-	$(CXX) $(CXX_BUILD_FLAGS) src/bdap.cpp -o $@
+obj/encryption.obj: src/encryption.cpp include/encryption.h include/encryption_core.h
+	$(CXX) $(CXX_BUILD_FLAGS) src/encryption.cpp -o $@
 
-obj/bdap_core.obj: src/bdap_core.c include/aes256ctr.h include/aes256gcm.h include/bdap_core.h include/bdap_error.h include/curve25519.h include/ed25519.h include/rand.h include/shake256.h include/utils.h
-	$(CC) $(C_BUILD_FLAGS) src/bdap_core.c -o $@
+obj/encryption_core.obj: src/encryption_core.c include/aes256ctr.h include/aes256gcm.h include/encryption_core.h include/encryption_error.h include/curve25519.h include/ed25519.h include/rand.h include/shake256.h include/utils.h
+	$(CC) $(C_BUILD_FLAGS) src/encryption_core.c -o $@
 
-obj/bdap_error.obj: src/bdap_error.c include/bdap_error.h
-	$(CC) $(C_BUILD_FLAGS) src/bdap_error.c -o $@
+obj/encryption_error.obj: src/encryption_error.c include/encryption_error.h
+	$(CC) $(C_BUILD_FLAGS) src/encryption_error.c -o $@
 
 obj/curve25519.obj: src/curve25519.c include/curve25519.h include/fe.h include/rand.h include/utils.h
 	$(CC) $(C_BUILD_FLAGS) src/curve25519.c -o $@
@@ -136,8 +136,8 @@ obj/utils.obj: src/utils.c include/utils.h
 	$(CC) $(C_BUILD_FLAGS) src/utils.c -o $@
 
 # BDAP test source code
-obj/bdap_test.obj: test/bdap_test.cpp include/aes256ctr.h include/aes256gcm.h include/bdap.h include/bdap_error.h include/curve25519.h include/ed25519.h include/rand.h include/shake256.h include/utils.h
-	$(CXX) $(CXX_BUILD_FLAGS) test/bdap_test.cpp -o $@
+obj/encryption_test.obj: test/encryption_test.cpp include/aes256ctr.h include/aes256gcm.h include/encryption.h include/encryption_error.h include/curve25519.h include/ed25519.h include/rand.h include/shake256.h include/utils.h
+	$(CXX) $(CXX_BUILD_FLAGS) test/encryption_test.cpp -o $@
 
 # Additional test source code
 obj/aes256_test.obj: test/aes256_test.c include/aes256.h include/rand.h include/utils.h
@@ -149,8 +149,8 @@ obj/aes256ctr_test.obj: test/aes256ctr_test.c include/aes256ctr.h include/rand.h
 obj/aes256gcm_test.obj: test/aes256gcm_test.c include/aes256gcm.h include/utils.h
 	$(CC) $(C_BUILD_FLAGS) $(OPENSSL_INC) test/aes256gcm_test.c -o $@
 
-obj/bdap_core_test.obj: test/bdap_core_test.c include/bdap_core.h include/curve25519.h include/ed25519.h include/rand.h include/utils.h
-	$(CC) $(C_BUILD_FLAGS) $(OPENSSL_INC) test/bdap_core_test.c -o $@
+obj/encryption_core_test.obj: test/encryption_core_test.c include/encryption_core.h include/curve25519.h include/ed25519.h include/rand.h include/utils.h
+	$(CC) $(C_BUILD_FLAGS) $(OPENSSL_INC) test/encryption_core_test.c -o $@
 
 obj/curve25519_test.obj: test/curve25519_test.c include/curve25519.h include/rand.h include/utils.h
 	$(CC) $(C_BUILD_FLAGS) $(OPENSSL_INC) test/curve25519_test.c -o $@
