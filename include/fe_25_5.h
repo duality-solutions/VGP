@@ -1,3 +1,6 @@
+// Copyright (c) 2018-2019 Duality Blockchain Solutions Developers
+// See LICENSE.md file for license, copying and use information.
+
 #ifndef _FE_25_5_H
 #define _FE_25_5_H
 

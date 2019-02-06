@@ -1,3 +1,6 @@
+// Copyright (c) 2018-2019 Duality Blockchain Solutions Developers
+// See LICENSE.md file for license, copying and use information.
+
 #include <stdio.h>
 #include <string.h>
 #if defined(__unix__) || defined(__linux__) || defined(__APPLE__)

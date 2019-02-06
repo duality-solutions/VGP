@@ -1,3 +1,6 @@
+// Copyright (c) 2018-2019 Duality Blockchain Solutions Developers
+// See LICENSE.md file for license, copying and use information.
+
 #ifndef _BDAP_ERROR_H
 #define _BDAP_ERROR_H
 

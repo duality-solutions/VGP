@@ -1,3 +1,6 @@
+// Copyright (c) 2018-2019 Duality Blockchain Solutions Developers
+// See LICENSE.md file for license, copying and use information.
+
 #include "aes256ctr.h"
 #include "aes256.h"
 #include "utils.h"

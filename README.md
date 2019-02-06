@@ -56,3 +56,6 @@ The above command shall produce BDAP E2E library as a static library in `lib\bda
 executables, namely:
 * `bin\tests.exe` is the component tests that requires OpenSSL library, and
 * `bin\bdap_test.exe` contains positive and negative tests as per BDAP E2E specification.
+
+## **License**
+See LICENSE.md file for copying and use information.

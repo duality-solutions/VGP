@@ -1,3 +1,6 @@
+// Copyright (c) 2018-2019 Duality Blockchain Solutions Developers
+// See LICENSE.md file for license, copying and use information.
+
 #include <stdlib.h>
 #include <string.h>
 #if !defined(_MSC_VER)
