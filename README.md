@@ -1,8 +1,8 @@
 # **VGP (Very Good Privacy) E2E Encryption Library**
 
-BDAP's Very Good Privacy (VGP) End-to-End (E2E) encryption library is a portable and standalone library for elliptic-curve integrated encryption system for a multiple-user setting. The core of the library is written in C language (conforming to C99 standard) with a C++ wrapper (conforming to C++ 11 standard).
+Very Good Privacy (VGP) End-to-End (E2E) encryption library is a portable and standalone library for elliptic-curve integrated encryption system for a multiple-user setting. The core of the library is written in C language (conforming to C99 standard) with a C++ wrapper (conforming to C++ 11 standard).
 
-The components of BDAP E2E are given below:
+The components of VGP E2E are given below:
 * Ed25519/Curve25519
 
     The library accepts Ed25519 public and private keys, and they are converted to Curve25519 for internal operation, e.g. ephemeral key-exchange.
@@ -19,7 +19,7 @@ The components of BDAP E2E are given below:
 
     This encryption scheme is used to encrypt the actual message payload using the random ephemeral secret.
 
-BDAP's VGP E2E encryption library has no dependencies and it has been tested on the following platforms:
+VGP E2E encryption library has no dependencies and it has been tested on the following platforms:
 * 32-bit x86 Linux (Ubuntu 18.04),
 * 64-bit x86-64 Linux (Ubuntu 18.04),
 * 32-bit ARM Linux (Debian 9.4),
@@ -30,7 +30,7 @@ BDAP's VGP E2E encryption library has no dependencies and it has been tested on 
 
 ## **How to Build**
 
-The instructions on how to build BDAP's VGP E2E encryption library for various platforms are described below.
+The instructions on how to build VGP E2E encryption library for various platforms are described below.
 
 ### **Linux and OS X**
 
@@ -38,18 +38,18 @@ In order to build the library, `make`, `gcc` and `g++` are required. Furthermore
 
 To build the library and the tests, adjust the variables `OPENSSL_PATH`, `OPENSSL_INC` and `OPENSSL_LIB` in `Makefile` accordingly, and execute the following command:
 ```bash
-cd $BDAP_SOURCE
+cd $VGP_SOURCE
 make
 ```
-The above command shall produce BDAP E2E library as a static library in `lib/libencryption.a` and two test executables, namely:
+The above command shall produce VGP E2E library as a static library in `lib/libencryption.a` and two test executables, namely:
 * `bin/tests` is the component tests that requires OpenSSL library, and
-* `bin/encryption_test` contains positive and negative tests as per BDAP E2E specification.
+* `bin/encryption_test` contains positive and negative tests as per VGP E2E specification.
 
 ### **Windows**
 
-In Windows environment, BDAP E2E library requires Visual C++ compiler. OpenSSL library (either static or dynamic library) is also required for unit/component testing. Open `Makefile.windows`, and adjust the variables `OPENSSL_PATH`, `OPENSSL_INC` and `OPENSSL_LIB` accordingly and build the library and the associated tests using Microsoft NMake as follows.
+In Windows environment, VGP E2E library requires Visual C++ compiler. OpenSSL library (either static or dynamic library) is also required for unit/component testing. Open `Makefile.windows`, and adjust the variables `OPENSSL_PATH`, `OPENSSL_INC` and `OPENSSL_LIB` accordingly and build the library and the associated tests using Microsoft NMake as follows.
 ```
-cd $BDAP_SOURCE
+cd $VGP_SOURCE
 nmake -f Makefile.windows
 ```
 The above command shall produce VGP E2E encryption library as a static library in `lib\encryption.lib` and two test
