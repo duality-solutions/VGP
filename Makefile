@@ -34,21 +34,21 @@ CXX_BUILD_FLAGS= $(CXX_FLAGS) $(OPT_FLAGS) $(LANG_FLAGS) $(WARN_FLAGS)
 all: create_dirs libs tests
 
 # Executable targets
-TESTS          = bin/tests
-BDAP_TEST      = bin/encryption_test
-BDAP_LIB       = lib/lib_bdap_encryption.a
+TESTS         = bin/tests
+VGP_TEST      = bin/encryption_test
+VGP_LIB       = lib/lib_vgp_encryption.a
 
-tests: $(TESTS) $(BDAP_TEST)
-libs: $(BDAP_LIB)
+tests: $(TESTS) $(VGP_TEST)
+libs: $(VGP_LIB)
 
 # Misc targets
 
-run: create_dirs $(TESTS) $(BDAP_TEST)
-	@echo Executing BDAP component tests ... 
+run: create_dirs $(TESTS) $(VGP_TEST)
+	@echo Executing VGP component tests ... 
 	@$(TESTS)
 	@echo
-	@echo Executing BDAP positive and negative tests
-	@$(BDAP_TEST)
+	@echo Executing VGP positive and negative tests
+	@$(VGP_TEST)
 
 # create output directories
 create_dirs:
@@ -66,7 +66,7 @@ LIBOBJS = obj/aes256.obj obj/aes256ctr.obj obj/aes256gcm.obj \
 	obj/ed25519.obj obj/fe.obj obj/ge.obj obj/os_rand.obj obj/rand.obj \
 	obj/sha512.obj obj/shake256.obj obj/shake256_rand.obj obj/utils.obj
 
-BDAP_TESTOBJS = obj/encryption_test.obj
+VGP_TESTOBJS = obj/encryption_test.obj
 
 TESTOBJS = obj/aes256_test.obj obj/aes256ctr_test.obj obj/aes256gcm_test.obj \
 	obj/encryption_core_test.obj obj/curve25519_test.obj obj/convert_test.obj \
@@ -74,15 +74,15 @@ TESTOBJS = obj/aes256_test.obj obj/aes256ctr_test.obj obj/aes256gcm_test.obj \
 
 # Executable targets
 
-$(BDAP_TEST): $(BDAP_LIB) $(BDAP_TESTOBJS)
-	$(CXX) -o $@ $(LDFLAGS) $(BDAP_TESTOBJS) $(BDAP_LIB)
+$(VGP_TEST): $(VGP_LIB) $(VGP_TESTOBJS)
+	$(CXX) -o $@ $(LDFLAGS) $(VGP_TESTOBJS) $(VGP_LIB)
 
-$(TESTS): $(BDAP_LIB) $(TESTOBJS)
-	$(CC) -o $@ $(LDFLAGS) $(TESTOBJS) $(BDAP_LIB) $(OPENSSL_LIB)
+$(TESTS): $(VGP_LIB) $(TESTOBJS)
+	$(CC) -o $@ $(LDFLAGS) $(TESTOBJS) $(VGP_LIB) $(OPENSSL_LIB)
 
 # Library targets
 
-$(BDAP_LIB): $(LIBOBJS)
+$(VGP_LIB): $(LIBOBJS)
 	$(MAKELIB)
 
 # Build Commands
@@ -135,7 +135,7 @@ obj/shake256_rand.obj: src/shake256_rand.c include/shake256_rand.h include/shake
 obj/utils.obj: src/utils.c include/utils.h
 	$(CC) $(C_BUILD_FLAGS) src/utils.c -o $@
 
-# BDAP test source code
+# VGP test source code
 obj/encryption_test.obj: test/encryption_test.cpp include/aes256ctr.h include/aes256gcm.h include/encryption.h include/encryption_error.h include/curve25519.h include/ed25519.h include/rand.h include/shake256.h include/utils.h
 	$(CXX) $(CXX_BUILD_FLAGS) test/encryption_test.cpp -o $@
 

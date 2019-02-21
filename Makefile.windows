@@ -22,7 +22,7 @@ POST_LINK_CMD  =
 
 LIB_LINKS_TO   = user32.lib ws2_32.lib
 TEST_LIB_DEP   = gdi32.lib
-EXE_LINKS_TO   = lib\bdap_encryption.lib $(LIB_LINKS_TO)
+EXE_LINKS_TO   = lib\vgp_encryption.lib $(LIB_LINKS_TO)
 
 BUILD_FLAGS    = $(GENERAL_FLAGS) $(ABI_FLAGS) $(LANG_FLAGS) $(OPT_FLAGS) $(WARN_FLAGS)
 
@@ -31,22 +31,22 @@ all: create_dirs libs tests
 
 # Executable targets
 TESTS          = bin\tests.exe
-BDAP_TEST      = bin\bdap_encryption_test.exe
-BDAP_LIB       = lib\bdap_encryption.lib
+VGP_TEST      = bin\vgp_encryption_test.exe
+VGP_LIB       = lib\vgp_encryption.lib
 
-tests: $(TESTS) $(BDAP_TEST)
-libs: $(BDAP_LIB)
+tests: $(TESTS) $(VGP_TEST)
+libs: $(VGP_LIB)
 
 # Misc targets
 
-run: create_dirs $(TESTS) $(BDAP_TEST)
-	@echo Executing BDAP component tests ... 
+run: create_dirs $(TESTS) $(VGP_TEST)
+	@echo Executing VGP component tests ... 
 	@$(TESTS)
 	@echo off
 	@echo.
 	@echo on
-	@echo Executing BDAP positive and negative tests
-	@$(BDAP_TEST)
+	@echo Executing VGP positive and negative tests
+	@$(VGP_TEST)
 
 # create output directories
 create_dirs:
@@ -66,7 +66,7 @@ LIBOBJS = obj\aes256.obj obj\aes256ctr.obj obj\aes256gcm.obj \
 	obj\ed25519.obj obj\fe.obj obj\ge.obj obj\os_rand.obj obj\rand.obj \
 	obj\sha512.obj obj\shake256.obj obj\shake256_rand.obj obj\utils.obj
 
-BDAP_TESTOBJS = obj\encryption_test.obj
+VGP_TESTOBJS = obj\encryption_test.obj
 
 TESTOBJS = obj\aes256_test.obj obj\aes256ctr_test.obj obj\aes256gcm_test.obj \
 	obj\encryption_core_test.obj obj\curve25519_test.obj obj\convert_test.obj \
@@ -74,17 +74,17 @@ TESTOBJS = obj\aes256_test.obj obj\aes256ctr_test.obj obj\aes256gcm_test.obj \
 
 # Executable targets
 
-$(BDAP_TEST): $(BDAP_LIB) $(BDAP_TESTOBJS)
-	@$(EXE_LINK_CMD) $(LDFLAGS) $(BDAP_TESTOBJS) $(EXE_LINKS_TO) /OUT:$@
+$(VGP_TEST): $(VGP_LIB) $(VGP_TESTOBJS)
+	@$(EXE_LINK_CMD) $(LDFLAGS) $(VGP_TESTOBJS) $(EXE_LINKS_TO) /OUT:$@
 	@$(POST_LINK_CMD)
 
-$(TESTS): $(BDAP_LIB) $(TESTOBJS)
+$(TESTS): $(VGP_LIB) $(TESTOBJS)
 	@$(EXE_LINK_CMD) $(LDFLAGS) $(TESTOBJS) $(EXE_LINKS_TO) $(TEST_LIB_DEP) $(OPENSSL_LIB) /OUT:$@
 	@$(POST_LINK_CMD)
 
 # Library targets
 
-lib\bdap_encryption.lib: $(LIBOBJS)
+lib\vgp_encryption.lib: $(LIBOBJS)
 	@$(AR) $(LIBOBJS) /OUT:$@
 
 # Build Commands
@@ -137,7 +137,7 @@ obj\shake256_rand.obj: src/shake256_rand.c include/shake256_rand.h include/shake
 obj\utils.obj: src/utils.c include/utils.h
 	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c src/utils.c /Fo$@
 
-# BDAP test source code
+# VGP test source code
 obj\encryption_test.obj: test/encryption_test.cpp include/aes256ctr.h include/aes256gcm.h include/encryption.h include/encryption_error.h include/curve25519.h include/ed25519.h include/rand.h include/shake256.h include/utils.h
 	@$(CXX) $(BUILD_FLAGS) /Iinclude /nologo /c test/encryption_test.cpp /Fo$@
 
