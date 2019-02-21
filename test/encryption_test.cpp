@@ -545,6 +545,30 @@ bool decryptHardcodedCipherText()
     return true;
 }
 
+bool decryptInvalidCipherText()
+{
+    // a. Use a hardcoded Ed25519 private key seed taken from a BDAP entry
+    const CharVector vchLinkPrivKeySeed{
+        {   0x31,0x62,0x9c,0x22,0xfd,0xdc,0x49,0xee,0xf8,0xb3,0xe3,0xc4,0x06,0x93,0x16,0x66,
+            0xb2,0x8b,0xb2,0x85,0x24,0x98,0x6d,0x77,0x02,0x21,0x0f,0x12,0x8c,0xb5,0x30,0x16
+        }
+    };
+    // b. Use a hardcoded invalid ciphertext without a header. Just a raw C++ string: "ICE Server Info"
+    const CharVector vchLinkCipherText{
+        0x27,0x49,0x43,0x45,0x20,0x53,0x65,0x72,0x76,0x65,0x72,0x20,0x49,0x6e,0x66,0x6f,
+        0x20,0x32,0x27
+    };
+
+    // c. Try to decrypt link data.
+    std::string strErrorMessage = "N/A";
+    CharVector vchDecrypted;
+    bool decryptStatus = DecryptBDAPData(vchLinkPrivKeySeed, vchLinkCipherText, vchDecrypted, strErrorMessage);
+    assert(decryptStatus == true);
+    assert(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])));
+
+    return true;
+}
+
 int main(void)
 {
     DO_TEST("Random positive test: ", randomPositiveTest())
@@ -556,6 +580,8 @@ int main(void)
     DO_TEST("Decrypt last-value negative test: ", decryptLastValueNegativeTest())
 
     DO_TEST("Decrypt hardcoded encryption link: ", decryptHardcodedCipherText())
+
+    DO_TEST("Decrypt with invalid data and header: ", decryptInvalidCipherText())
 
     return 0;
 }
