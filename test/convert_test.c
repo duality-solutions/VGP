@@ -16,6 +16,12 @@ typedef struct
     const char *curve25519_pk_hex;
 } ed25519_curve25519_test_vectors;
 
+typedef struct
+{
+    const char *ed25519_sk_hex;
+    const char *ed25519_pk_hex;
+} ed25519_test_vectors;
+
 static ed25519_curve25519_test_vectors test_vectors[] =
 {
  	{
@@ -319,6 +325,64 @@ static ed25519_curve25519_test_vectors test_vectors[] =
 		"7318927d1bb50c847c61be6e581e72c13668fba008e16ee533e5dba009c70a78"
 	}
 };
+
+static ed25519_test_vectors ed_25519_test_vectors[] =
+{
+ 	{
+ 		/*
+ 		Ed25519 Key Information:
+
+		Private Seed Bytes:
+		0x40,0x20,0xa6,0xa5,0x20,0x31,0xc4,0xd7,0xa9,0xb3,0xab,0x2f,0x41,0x7a,0x30,0x13,
+		0x37,0x5f,0x81,0x4d,0x74,0x31,0xcc,0x41,0x8a,0x3a,0x7c,0x0e,0x25,0x5b,0x36,0x92
+
+		Private Key Bytes:
+		0xf0,0xd6,0x1e,0x75,0xba,0x3c,0x93,0x7d,0xc8,0x4e,0x28,0x6d,0xef,0x8d,0xc7,0x04,
+		0xc4,0x20,0xcb,0x02,0x63,0x2b,0xb5,0x91,0x48,0xf5,0x6a,0x8c,0xd8,0x3f,0x28,0x62,
+		0x2b,0xdf,0xa6,0x75,0x3d,0x1f,0x6f,0xcf,0xdb,0x93,0xbc,0x89,0x55,0xf9,0x84,0xa9,
+		0x60,0xf8,0x93,0xae,0x40,0x1f,0x73,0x20,0x75,0x90,0x8c,0x22,0xff,0xa9,0x3f,0x0a
+
+		Public Key Bytes:
+		0x24,0xa7,0xed,0xff,0x88,0x67,0x8e,0xc9,0xd8,0x50,0xbc,0xe3,0x6b,0xe1,0x40,0xbd,
+		0x6a,0xf9,0xc5,0xc7,0xcc,0x8d,0xb2,0x15,0x57,0x94,0x14,0xd9,0x14,0x91,0x31,0x03
+
+		Private Seed Hex:
+		4020a6a52031c4d7a9b3ab2f417a3013375f814d7431cc418a3a7c0e255b3692
+
+		Private Key Hex:
+		f0d61e75ba3c937dc84e286def8dc704c420cb02632bb59148f56a8cd83f28622bdfa6753d1f6fcfdb93bc8955f984a960f893ae401f732075908c22ffa93f0a
+	
+		Public Key Hex:
+		24a7edff88678ec9d850bce36be140bd6af9c5c7cc8db215579414d914913103
+
+ 		*/
+
+		"f0d61e75ba3c937dc84e286def8dc704c420cb02632bb59148f56a8cd83f28622bdfa6753d1f6fcfdb93bc8955f984a960f893ae401f732075908c22ffa93f0a",
+		"24a7edff88678ec9d850bce36be140bd6af9c5c7cc8db215579414d914913103"
+	}
+};
+
+bool ed25519_pubkey_convert_test()
+{
+    int32_t idx;
+    bool result = true;
+    uint8_t ed25519_sk[ED25519_PRIVATE_KEY_SIZE];
+    uint8_t ed25519_pk[ED25519_PUBLIC_KEY_SIZE];
+    uint8_t curve25519_pk[CURVE25519_PUBLIC_KEY_SIZE];
+    ed25519_test_vectors *ptr = NULL;
+
+    for (idx = 0;
+         result && idx < (int)(sizeof(ed_25519_test_vectors) / sizeof(ed25519_test_vectors));
+         idx++)
+    {
+        ptr = &ed_25519_test_vectors[idx];
+        hex_string_to_byte_array(ed25519_sk, ptr->ed25519_sk_hex);
+        hex_string_to_byte_array(ed25519_pk, ptr->ed25519_pk_hex);
+        result = ed25519_to_curve25519_public_key(curve25519_pk, ed25519_pk) == 0 ? true : false;
+    }
+
+    return result;
+}
 
 bool ed25519_to_curve25519_conversion_test()
 {

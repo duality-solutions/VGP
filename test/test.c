@@ -80,6 +80,9 @@ int main(int argc, char *argv[])
     DO_TEST("Ed25519 to Curve25519 conversion test: ",
         ed25519_to_curve25519_conversion_test());
 
+    DO_TEST("Ed25519 public key conversion test: ",
+        ed25519_pubkey_convert_test());
+
     DO_ITER_TEST("Ed25519 to Curve25519 random conversion test (%d iterations): ",
         num_iterations, ed25519_to_curve25519_random_conversion_test(num_iterations));
 
