@@ -62,7 +62,7 @@ clean:
 
 # Object Files
 LIBOBJS = obj\aes256.obj obj\aes256ctr.obj obj\aes256gcm.obj \
-	obj\.obj obj\encryption_core.obj obj\encryption_error.obj obj\curve25519.obj \
+	obj\encryption.obj obj\encryption_core.obj obj\encryption_error.obj obj\curve25519.obj \
 	obj\ed25519.obj obj\fe.obj obj\ge.obj obj\os_rand.obj obj\rand.obj \
 	obj\sha512.obj obj\shake256.obj obj\shake256_rand.obj obj\utils.obj
 
