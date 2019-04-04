@@ -66,6 +66,48 @@ static bool bdap_get_ephemeral_public_key_and_encrypted_secret(
 }
 
 /**
+ * @brief Evaluate the validity of a ciphertext 
+ * 
+ * @param ciphertext the ciphertext
+ * @param ciphertext_size the size of the ciphertext
+ * @param error_message the pointer to the error message
+ *                      in the event of error
+ * @return true if the ciphertext is valid
+ * @return false otherwise
+ */
+bool bdap_validate_ciphertext(const uint8_t* ciphertext,
+                              const size_t ciphertext_size,
+                              const char** error_message)
+{
+    uint16_t error_code = BDAP_SUCCESS;
+    uint16_t num_recipients = 0;
+    size_t minimum_ciphertext_size = 0;
+
+    if (ciphertext == NULL)
+    {
+        error_code = BDAP_INVALID_CIPHERTEXT;
+        goto validate_bail;
+    }
+
+    num_recipients = bdap_ciphertext_number_of_recipients(ciphertext);
+ 
+    minimum_ciphertext_size = bdap_ciphertext_header_size(num_recipients) + AES256GCM_TAG_SIZE;
+    
+    if ((num_recipients <= 0) || (ciphertext_size < minimum_ciphertext_size))
+    {
+        error_code = BDAP_INVALID_CIPHERTEXT;
+    }
+    
+validate_bail:
+    if (error_message != NULL)
+    {
+        *error_message = bdap_error_message[error_code];
+    }
+
+    return (error_code == BDAP_SUCCESS);
+}
+
+/**
  * @brief Computes the ciphertext size in bytes for a given
  * number of recipients and plaintext size in bytes.
  * 
@@ -323,7 +365,13 @@ bool bdap_decrypt(uint8_t* plaintext,
         !crypto_mlock(curve25519_sk, CURVE25519_PRIVATE_KEY_SIZE))
     {
         error_code = BDAP_MEMORY_PROTECTION_FAILED;
-        return false;
+        goto bdap_e2e_decrypt_bail_without_munlock;
+    }
+
+    if (false == bdap_validate_ciphertext(ciphertext, ciphertext_size, error_message))
+    {
+        error_code = BDAP_INVALID_CIPHERTEXT;
+        goto bdap_e2e_decrypt_bail;
     }
 
     /* 2. Compute Ed25519 public-key from private-key seed */
@@ -420,6 +468,7 @@ bdap_e2e_decrypt_bail:
     (void)crypto_munlock((void*)ed25519_private_key_seed,
                          ED25519_PRIVATE_KEY_SEED_SIZE);
     (void)crypto_munlock(curve25519_sk, CURVE25519_PRIVATE_KEY_SIZE);
+bdap_e2e_decrypt_bail_without_munlock:    
     crypto_memzero(curve25519_sk, sizeof(curve25519_sk));
     crypto_memzero(curve25519_ephemeral_pk, sizeof(curve25519_ephemeral_pk));
     crypto_memzero(ed25519_pk, sizeof(ed25519_pk));

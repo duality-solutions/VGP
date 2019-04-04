@@ -18,6 +18,7 @@
 #define BDAP_AESGCM_DECRYPT_FAILED                  11
 #define BDAP_NO_VALID_RECIPIENT                     12
 #define BDAP_MEMORY_PROTECTION_FAILED               13
+#define BDAP_INVALID_CIPHERTEXT                     14
 
 #ifdef __cplusplus
 extern "C" {

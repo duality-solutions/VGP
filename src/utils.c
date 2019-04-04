@@ -132,6 +132,8 @@ int32_t byte_array_to_hex_string(char *out, const uint8_t *in, size_t in_size)
         out[2*i]     = hex_lookup[((in[i] >> 4) & 0x0f)];
         out[2*i + 1] = hex_lookup[((in[i]     ) & 0x0f)];
     }
+    
+    out[2*in_size] = 0x00;
 
     return 0;
 }

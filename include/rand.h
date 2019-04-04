@@ -43,9 +43,14 @@ extern void (*bdap_randombytes)(uint8_t *buf, size_t buf_size);
  * @note The SHAKE256-based random number generators shall only be
  * used for testing purposes. Don't use it in live/production code,
  * unless you know what you are doing.
- * 
  */
 void use_shake256_rand();
+
+/**
+ * @brief Sets up the function pointers above to use OS random number
+ * generator.
+ */
+void use_os_rand();
 
 #ifdef __cplusplus
 }
