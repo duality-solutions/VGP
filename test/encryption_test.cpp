@@ -6,7 +6,6 @@
 #include <cstdbool>
 #include <cstdint>
 #include <cstring>
-#include <cassert>
 #include "encryption.h"
 #include "rand.h"
 #include "ed25519.h"
@@ -16,6 +15,7 @@
 #include "aes256gcm.h"
 #include "utils.h"
 #include "encryption_error.h"
+#include "vgp_assert.h"
 
 #define DO_TEST(name, func)   \
     std::cout << name << std::flush; \
@@ -30,6 +30,13 @@ bool randomPositiveTest()
 {
     int32_t index;
     const int32_t kNumberOfKeys = 10;
+    uint8_t seed[ 64 ];
+
+    // Generate random seed
+    use_os_rand();
+    bdap_randombytes(seed, sizeof(seed));
+    use_shake256_rand();
+    bdap_randominit(seed, sizeof(seed));
 
     // a. Create a random key seeds and use them to create a vchPubKeys variable with ten Ed25519
     //    public keys and a vchPrivKeySeeds variable with ten private key seeds.
@@ -58,8 +65,10 @@ bool randomPositiveTest()
     std::string strErrorMessage("N/A");
     CharVector vchCipherText;
     encryptStatus = EncryptBDAPData(vchPubKeys, vchData, vchCipherText, strErrorMessage);
-    assert(encryptStatus == true);
-    assert(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])));
+
+    VGP_ASSERT(encryptStatus == true, "Encryption failed");
+    VGP_ASSERT(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])),
+        "Incorrect error message");
 
     // d. For each private key seed in vchPrivKeySeeds, use the key seed call
     //    DecryptBDAPData(vchPrivKeySeed, vchCipherText, vchDecryptData, strErrorMessage)
@@ -70,10 +79,14 @@ bool randomPositiveTest()
         strErrorMessage = "N/A";
         CharVector vchDecrypted;
         bool decryptStatus = DecryptBDAPData(vchPrivKeySeeds[index], vchCipherText, vchDecrypted, strErrorMessage);
-        assert(decryptStatus == true);
-        assert(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])));
-        assert(0 == memcmp(vchData.data(), vchDecrypted.data(), vchData.size()));
+        VGP_ASSERT(decryptStatus == true, "Decryption failed");
+        VGP_ASSERT(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])),
+            "Incorrect error message");
+        VGP_ASSERT(0 == memcmp(vchData.data(), vchDecrypted.data(), vchData.size()),
+            "Incorrect decryption output size");
     }
+
+    use_os_rand();
 
     return true;
 }
@@ -309,8 +322,9 @@ bool hardCodedPositiveTest()
     std::string strErrorMessage("N/A");
     CharVector vchCipherText;
     encryptStatus = EncryptBDAPData(vchPubKeys, vchData, vchCipherText, strErrorMessage);
-    assert(encryptStatus == true);
-    assert(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])));
+    VGP_ASSERT(encryptStatus == true, "Encryption failed");
+    VGP_ASSERT(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])),
+        "Incorrect error message");
 
     // d. For each private key seed in vchPrivKeySeeds, use the key seed call
     //    DecryptBDAPData(vchPrivKeySeed, vchCipherText, vchDecryptData, strErrorMessage)
@@ -321,9 +335,11 @@ bool hardCodedPositiveTest()
         strErrorMessage = "N/A";
         CharVector vchDecrypted;
         bool decryptStatus = DecryptBDAPData(vchPrivKeySeeds[index], vchCipherText, vchDecrypted, strErrorMessage);
-        assert(decryptStatus == true);
-        assert(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])));
-        assert(0 == memcmp(vchData.data(), vchDecrypted.data(), vchData.size()));
+        VGP_ASSERT(decryptStatus == true, "Decryption failed");
+        VGP_ASSERT(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])),
+            "Incorrect error message");
+        VGP_ASSERT(0 == memcmp(vchData.data(), vchDecrypted.data(), vchData.size()),
+            "Incorrect decryption output size");
     }
 
     return true;
@@ -332,7 +348,14 @@ bool hardCodedPositiveTest()
 bool randomNegativeTest()
 {
     int32_t index;
+    uint8_t seed[ 64 ];
     const int32_t kNumberOfKeys = 10;
+
+    // Generate random seed
+    use_os_rand();
+    bdap_randombytes(seed, sizeof(seed));
+    use_shake256_rand();
+    bdap_randominit(seed, sizeof(seed));
 
     // a. Create 10 random key seeds and use them to create a vchPubKeys variable
     vCharVector vchPubKeys(kNumberOfKeys, CharVector(ED25519_PUBLIC_KEY_SIZE));
@@ -357,7 +380,7 @@ bool randomNegativeTest()
     std::string strErrorMessage("N/A");
     CharVector vchCipherText;
     encryptStatus = EncryptBDAPData(vchPubKeys, vchData, vchCipherText, strErrorMessage);
-    assert(encryptStatus == true);
+    VGP_ASSERT_WITH_SEED(encryptStatus == true, "Encryption failed", seed, sizeof(seed));
 
     // d. Create ten new random key seeds vchPrivKeySeed and use them to call
     //    DecryptBDAPData(vchPrivKeySeed, vchCipherText, vchDecryptData, strErrorMessage)
@@ -377,7 +400,9 @@ bool randomNegativeTest()
             numFailures++;
         }
     }
-    assert(numFailures == kNumberOfKeys);
+    VGP_ASSERT_WITH_SEED(numFailures == kNumberOfKeys, NULL, seed, sizeof(seed));
+
+    use_os_rand();
 
     return true;
 }
@@ -385,6 +410,7 @@ bool randomNegativeTest()
 bool decryptLastValueNegativeTest()
 {
     int32_t index;
+    uint8_t seed[ 64 ];
     const int32_t kNumberOfKeys = 3;
     const int32_t kFingerprintSize = 7;
     const int32_t kSecretSize = 32;
@@ -392,6 +418,12 @@ bool decryptLastValueNegativeTest()
     const int32_t kBufferSize = 3*CURVE25519_PUBLIC_KEY_SIZE;
     const int32_t kKeyIVSize = AES256CTR_KEY_SIZE + AES256CTR_IV_SIZE;
     const int32_t kKeyNonceSize = AES256GCM_KEY_SIZE + AES256GCM_NONCE_SIZE;
+
+    // Generate random seed
+    use_os_rand();
+    bdap_randombytes(seed, sizeof(seed));
+    use_shake256_rand();
+    bdap_randominit(seed, sizeof(seed));
 
     // a. Create 3 random key seeds and use them to create a vchPubKeys variable
     vCharVector vchPubKeys(kNumberOfKeys, CharVector(ED25519_PUBLIC_KEY_SIZE));
@@ -416,8 +448,9 @@ bool decryptLastValueNegativeTest()
     std::string strErrorMessage("N/A");
     CharVector vchCipherText;
     encryptStatus = EncryptBDAPData(vchPubKeys, vchData, vchCipherText, strErrorMessage);
-    assert(encryptStatus == true);
-    assert(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])));
+    VGP_ASSERT_WITH_SEED(encryptStatus == true, "Encryption failed", seed, sizeof(seed));
+    VGP_ASSERT_WITH_SEED(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])),
+        "Incorrect error message", seed, sizeof(seed));
 
     // d. Parse vchCipherText and extract the payload ciphertext into variable vchLastValue.
     CharVector::const_iterator iterator = vchCipherText.cbegin();
@@ -444,7 +477,7 @@ bool decryptLastValueNegativeTest()
         bool result = curve25519_dh(vchQ.data(),
                                     randomCurve25519PrivateKey.data(),
                                     vchEphemeralPublicKey.data());
-        assert(result == true);
+        VGP_ASSERT_WITH_SEED(result == true, "Failed X25519 exchange", seed, sizeof(seed));
 
         CharVector vchBuffer(kBufferSize, 0);
         CharVector::iterator outputIterator = vchBuffer.begin();
@@ -459,7 +492,7 @@ bool decryptLastValueNegativeTest()
 
         CharVector vchKeyIV(kKeyIVSize, 0);
         result = (0 == shake256(vchKeyIV.data(), kKeyIVSize, vchBuffer.data(), vchBuffer.size()));
-        assert(result == true);
+        VGP_ASSERT_WITH_SEED(result == true, "Failed SHAKE256 XOF operation", seed, sizeof(seed));
 
         CharVector vchSecret(kSecretSize, 0);
         size_t secretSize = 0;
@@ -469,12 +502,12 @@ bool decryptLastValueNegativeTest()
                                          vchLastValue.size(),
                                          (vchKeyIV.data() + AES256CTR_KEY_SIZE),
                                          vchKeyIV.data()));
-        assert(secretSize == vchSecret.size());
-        assert(result == true);
+        VGP_ASSERT_WITH_SEED(secretSize == vchSecret.size(), NULL, seed, sizeof(seed));
+        VGP_ASSERT_WITH_SEED(result == true, "Failed AES256CTR decrypt operation", seed, sizeof(seed));
 
         CharVector vchKeyNonce(kKeyIVSize, 0);
         result = (0 == shake256(vchKeyNonce.data(), kKeyNonceSize, vchSecret.data(), vchSecret.size()));
-        assert(result == true);
+        VGP_ASSERT_WITH_SEED(result == true, "Failed SHAKE256 XOF operation", seed, sizeof(seed));
 
         CharVector plaintext(vchDataLength);
         size_t plaintextSize = 0;
@@ -486,12 +519,14 @@ bool decryptLastValueNegativeTest()
                                          0,
                                          (vchKeyNonce.data() + AES256GCM_KEY_SIZE),
                                          vchKeyNonce.data()));
-        assert(result == true);
-        assert(plaintextSize == 0);
+        VGP_ASSERT_WITH_SEED(result == true, "Failed AES256GCM decrypt operation", seed, sizeof(seed));
+        VGP_ASSERT_WITH_SEED(plaintextSize == 0, NULL, seed, sizeof(seed));
     }
 
     // f. Unit test passes if EncryptBDAPData returns true, parsing and extraction is successful,
     //    and all attempts to decrypt vchLastValue fail.
+
+    use_os_rand();
 
     return true;
 }
@@ -539,8 +574,9 @@ bool decryptHardcodedCipherText()
     std::string strErrorMessage = "N/A";
     CharVector vchDecrypted;
     bool decryptStatus = DecryptBDAPData(vchLinkPrivKeySeed, vchLinkCipherText, vchDecrypted, strErrorMessage);
-    assert(decryptStatus == true);
-    assert(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])));
+    VGP_ASSERT(decryptStatus == true, "Decryption failed");
+    VGP_ASSERT(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])),
+        "Incorrect error message");
 
     return true;
 }
@@ -597,8 +633,7 @@ bool decryptInvalidCipherTextLong()
     std::string strErrorMessage = "N/A";
     CharVector vchDecrypted;
     bool decryptStatus = DecryptBDAPData(vchLinkPrivKeySeed, vchLinkCipherText, vchDecrypted, strErrorMessage);
-    assert(decryptStatus == true);
-    assert(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])));
+    VGP_ASSERT(decryptStatus == false, "Decryption is not expected to pass");
 
     return true;
 }
@@ -620,8 +655,243 @@ bool decryptInvalidCipherTextShort()
     std::string strErrorMessage = "N/A";
     CharVector vchDecrypted;
     bool decryptStatus = DecryptBDAPData(vchLinkPrivKeySeed, vchLinkCipherText, vchDecrypted, strErrorMessage);
-    assert(decryptStatus == true);
-    assert(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])));
+    VGP_ASSERT(decryptStatus == false, "Decryption is not expected to pass");
+
+    return true;
+}
+
+bool zeroPayloadTest()
+{
+    uint8_t seed[ 64 ];
+    CharVector vchSeed(ED25519_PRIVATE_KEY_SEED_SIZE);
+    CharVector vchPrivateKey(ED25519_PRIVATE_KEY_SIZE);
+
+    // Generate random seed
+    use_os_rand();
+    bdap_randombytes(seed, sizeof(seed));
+    use_shake256_rand();
+    bdap_randominit(seed, sizeof(seed));
+
+    vCharVector vchPubKeys(1, CharVector(ED25519_PUBLIC_KEY_SIZE));
+    vCharVector vchPrivKeySeeds(1, CharVector(ED25519_PRIVATE_KEY_SEED_SIZE));
+    bdap_randombytes(vchSeed.data(), ED25519_PRIVATE_KEY_SEED_SIZE);
+    ed25519_seeded_keypair(vchPubKeys[0].data(), vchPrivateKey.data(), vchSeed.data());
+    vchPrivKeySeeds[0] = vchSeed;
+
+    CharVector vchData(0);
+
+    bool encryptStatus = false;
+    std::string strErrorMessage("N/A");
+    CharVector vchCipherText;
+    encryptStatus = EncryptBDAPData(vchPubKeys, vchData, vchCipherText, strErrorMessage);
+    VGP_ASSERT_WITH_SEED(encryptStatus == true, "Encryption failed", seed, sizeof(seed));
+    VGP_ASSERT_WITH_SEED(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])),
+        "Incorrect error message", seed, sizeof(seed));
+
+    strErrorMessage = "N/A";
+    CharVector vchDecrypted;
+    bool decryptStatus = DecryptBDAPData(vchPrivKeySeeds[0], vchCipherText, vchDecrypted, strErrorMessage);
+    VGP_ASSERT_WITH_SEED(decryptStatus == true, "Decryption failed", seed, sizeof(seed));
+    VGP_ASSERT_WITH_SEED(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])),
+        "Incorrect error message", seed, sizeof(seed));
+    VGP_ASSERT_WITH_SEED(0 == vchData.size(), NULL, seed, sizeof(seed));
+
+    use_os_rand();
+
+    return true;
+}
+
+bool randomStructuredInvalidCiphertextTest(int32_t maxNumberOfRecipients)
+{
+    uint8_t seed[ 64 ];
+    int32_t index, num_recipients, target_key;
+    CharVector vchSeed(ED25519_PRIVATE_KEY_SEED_SIZE);
+    CharVector vchPrivateKey(ED25519_PRIVATE_KEY_SIZE);
+
+    // Generate random seed
+    use_os_rand();
+    bdap_randombytes(seed, sizeof(seed));
+    use_shake256_rand();
+    bdap_randominit(seed, sizeof(seed));
+
+    // Create a random key seeds and use them to create a vchPubKeys variable with ten Ed25519
+    // public keys and a vchPrivKeySeeds variable with ten private key seeds.
+    for (num_recipients = 1; num_recipients <= maxNumberOfRecipients; num_recipients++)
+    {
+        vCharVector vchPubKeys(num_recipients, CharVector(ED25519_PUBLIC_KEY_SIZE));
+        vCharVector vchPrivKeySeeds(num_recipients, CharVector(ED25519_PRIVATE_KEY_SEED_SIZE));
+        bdap_randombytes(vchSeed.data(), ED25519_PRIVATE_KEY_SEED_SIZE);
+        for (index = 0; index < num_recipients; ++index)
+        {
+            CharVector vchSeed(ED25519_PRIVATE_KEY_SEED_SIZE);
+            CharVector vchPrivateKey(ED25519_PRIVATE_KEY_SIZE);
+
+            bdap_randombytes(vchSeed.data(), ED25519_PRIVATE_KEY_SEED_SIZE);
+            ed25519_seeded_keypair(vchPubKeys[index].data(), vchPrivateKey.data(), vchSeed.data());
+            vchPrivKeySeeds[index] = vchSeed;
+        }
+
+        // Create a random length of string between 16-262 characters for the vchData variable.
+        uint16_t vchDataLength = 0;
+        bdap_randombytes(reinterpret_cast<uint8_t *>(&vchDataLength), sizeof(uint16_t));
+        vchDataLength = 16 + (vchDataLength & 0x00FF);
+        CharVector vchData(vchDataLength);
+        bdap_randombytes(vchData.data(), vchDataLength);
+
+        // Call EncryptBDAPData(vchPubKeys, vchData, vchCipherText, strErrorMessage). Make sure
+        // EncryptBDAPData returns true and strErrorMessage is empty.
+        bool encryptStatus = false;
+        std::string strErrorMessage("N/A");
+        CharVector vchCipherText;
+        encryptStatus = EncryptBDAPData(vchPubKeys, vchData, vchCipherText, strErrorMessage);
+
+        VGP_ASSERT(encryptStatus == true, "Encryption failed");
+        VGP_ASSERT(0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_SUCCESS])),
+            "Incorrect error message");
+
+        // Make a copy of the ciphertext
+        CharVector vchCipherTextBackup(vchCipherText);
+        CharVector vchDecrypted;
+
+        // 1. Set the first two bytes to 0
+        vchCipherText = vchCipherTextBackup;
+        vchCipherText.data()[0] = 0x00;
+        vchCipherText.data()[1] = 0x00;
+        bdap_randombytes(reinterpret_cast<uint8_t *>(&target_key), sizeof(target_key));
+        target_key %= num_recipients;
+        bool decryptStatus = DecryptBDAPData(vchPrivKeySeeds[target_key], vchCipherText, vchDecrypted, strErrorMessage);
+        VGP_ASSERT_WITH_SEED(decryptStatus == false, "Decryption is not expected to pass", seed, sizeof(seed));
+        bool errorMessageStatus = 
+        (0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_INVALID_CIPHERTEXT])) ||
+            0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_AESGCM_DECRYPT_FAILED])) ||
+            0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_NO_VALID_RECIPIENT]))); 
+        VGP_ASSERT_WITH_SEED(errorMessageStatus == true,
+            "The error status should be INVALID_CIPHERTEXT, AESGCM_DECRYPT_FAILED or NO_VALID_RECIPIENT",
+            seed, sizeof(seed));
+
+        // 2. Puncture a byte from the ciphertext
+        for (index = 0; index < (int32_t)vchCipherTextBackup.size(); index++)
+        {
+            CharVector vchBuffer(vchCipherTextBackup.size() - 1);
+            memcpy(vchBuffer.data(), vchCipherTextBackup.data(), index);
+            memcpy(vchBuffer.data() + index, 
+                vchCipherTextBackup.data() + index + 1,
+                vchCipherTextBackup.size() - index - 1);
+            bdap_randombytes(reinterpret_cast<uint8_t *>(&target_key), sizeof(target_key));
+            target_key %= num_recipients;
+            decryptStatus = DecryptBDAPData(vchPrivKeySeeds[target_key], vchCipherText, vchDecrypted, strErrorMessage);
+            VGP_ASSERT_WITH_SEED(decryptStatus == false, "Decryption is not expected to pass", seed, sizeof(seed));
+            errorMessageStatus = 
+            (0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_INVALID_CIPHERTEXT])) ||
+                0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_AESGCM_DECRYPT_FAILED])) ||
+                0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_NO_VALID_RECIPIENT]))); 
+            VGP_ASSERT_WITH_SEED(errorMessageStatus == true,
+                "The error status should be INVALID_CIPHERTEXT, AESGCM_DECRYPT_FAILED or NO_VALID_RECIPIENT",
+                seed, sizeof(seed));
+        }
+
+        // 3. Randomly inserting a byte in the ciphertext
+        for (index = 0; index < (int32_t)vchCipherTextBackup.size(); index++)
+        {
+            uint8_t random_byte[ 1 ];
+            CharVector vchBuffer(vchCipherTextBackup.size() + 1);
+            memcpy(vchBuffer.data(), vchCipherTextBackup.data(), index);
+            bdap_randombytes(random_byte, sizeof(random_byte));
+            memcpy(vchBuffer.data() + index, random_byte, sizeof(random_byte));
+            memcpy(vchBuffer.data() + index + 1, 
+                vchCipherTextBackup.data() + index,
+                vchCipherTextBackup.size() - index);
+            bdap_randombytes(reinterpret_cast<uint8_t *>(&target_key), sizeof(target_key));
+            target_key %= num_recipients;
+            decryptStatus = DecryptBDAPData(vchPrivKeySeeds[target_key], vchCipherText, vchDecrypted, strErrorMessage);
+            VGP_ASSERT_WITH_SEED(decryptStatus == false, "Decryption is not expected to pass", seed, sizeof(seed));
+            errorMessageStatus = 
+            (0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_INVALID_CIPHERTEXT])) ||
+                0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_AESGCM_DECRYPT_FAILED])) ||
+                0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_NO_VALID_RECIPIENT]))); 
+            VGP_ASSERT_WITH_SEED(errorMessageStatus == true,
+                "The error status should be INVALID_CIPHERTEXT, AESGCM_DECRYPT_FAILED or NO_VALID_RECIPIENT",
+                seed, sizeof(seed));
+        }
+
+        // 4a. Incorrect number of recipient: 1 to 5 more than the actual number
+        for (index = 1; index <= 5; index++)
+        {
+            vchCipherText = vchCipherTextBackup;
+            uint16_t numberOfRecipients = (uint16_t)(vchCipherText.data()[0] + 256 * vchCipherText.data()[1]);
+            numberOfRecipients += index;
+
+            vchCipherText.data()[0] = (uint8_t) numberOfRecipients;
+            vchCipherText.data()[1] = (uint8_t)(numberOfRecipients >> 8);
+
+            bdap_randombytes(reinterpret_cast<uint8_t *>(&target_key), sizeof(target_key));
+            target_key %= num_recipients;
+            decryptStatus = DecryptBDAPData(vchPrivKeySeeds[target_key], vchCipherText, vchDecrypted, strErrorMessage);
+            VGP_ASSERT_WITH_SEED(decryptStatus == false, "Decryption is not expected to pass", seed, sizeof(seed));
+        }
+        // 4b. Incorrect number of recipient: less than the actual number
+        for (index = 1; index <= 5; index++)
+        {
+            vchCipherText = vchCipherTextBackup;
+            uint16_t numberOfRecipients = (uint16_t)(vchCipherText.data()[0] + 256 * vchCipherText.data()[1]);
+            numberOfRecipients -= index;
+
+            vchCipherText.data()[0] = (uint8_t) numberOfRecipients;
+            vchCipherText.data()[1] = (uint8_t)(numberOfRecipients >> 8);
+
+            bdap_randombytes(reinterpret_cast<uint8_t *>(&target_key), sizeof(target_key));
+            target_key %= num_recipients;
+            decryptStatus = DecryptBDAPData(vchPrivKeySeeds[target_key], vchCipherText, vchDecrypted, strErrorMessage);
+            VGP_ASSERT_WITH_SEED(decryptStatus == false, "Decryption is not expected to pass", seed, sizeof(seed));
+        }
+    }
+
+    use_os_rand();
+
+    return true;
+}
+
+bool randomUnstructuredInvalidCiphertextTest(int32_t maxNumberOfRounds)
+{
+    int32_t rounds;
+    uint8_t seed[ 64 ];
+    CharVector vchSeed(ED25519_PRIVATE_KEY_SEED_SIZE);
+    CharVector vchPrivateKey(ED25519_PRIVATE_KEY_SIZE);
+
+    // Generate random seed
+    use_os_rand();
+    bdap_randombytes(seed, sizeof(seed));
+    use_shake256_rand();
+    bdap_randominit(seed, sizeof(seed));
+
+    vCharVector vchPubKeys(1, CharVector(ED25519_PUBLIC_KEY_SIZE));
+    vCharVector vchPrivKeySeeds(1, CharVector(ED25519_PRIVATE_KEY_SEED_SIZE));
+    bdap_randombytes(vchSeed.data(), ED25519_PRIVATE_KEY_SEED_SIZE);
+    ed25519_seeded_keypair(vchPubKeys[0].data(), vchPrivateKey.data(), vchSeed.data());
+    vchPrivKeySeeds[0] = vchSeed;
+
+    for (rounds=0; rounds < maxNumberOfRounds; rounds++)
+    {
+        uint16_t vchDataLength = 0;
+        bdap_randombytes(reinterpret_cast<uint8_t *>(&vchDataLength), sizeof(uint16_t));
+        vchDataLength = (vchDataLength & 0xFFFF);
+        CharVector vchData(vchDataLength);
+        bdap_randombytes(vchData.data(), vchDataLength);
+
+        std::string strErrorMessage = "N/A";
+        CharVector vchDecrypted;
+        bool decryptStatus = DecryptBDAPData(vchPrivKeySeeds[0], vchData, vchDecrypted, strErrorMessage);
+        VGP_ASSERT_WITH_SEED(decryptStatus == false, "Decryption is not expected to pass", seed, sizeof(seed));
+        bool errorMessageStatus = 
+            (0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_INVALID_CIPHERTEXT])) ||
+             0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_AESGCM_DECRYPT_FAILED])) ||
+             0 == strErrorMessage.compare(std::string(bdap_error_message[BDAP_NO_VALID_RECIPIENT]))); 
+        VGP_ASSERT_WITH_SEED(errorMessageStatus == true,
+            "The error status should be INVALID_CIPHERTEXT, AESGCM_DECRYPT_FAILED or NO_VALID_RECIPIENT",
+            seed, sizeof(seed));
+    }
+
+    use_os_rand();
 
     return true;
 }
@@ -641,6 +911,12 @@ int main(void)
     DO_TEST("Decrypt invalid encrypted deny list: ", decryptInvalidCipherTextLong())
 
     DO_TEST("Decrypt with invalid data and header: ", decryptInvalidCipherTextShort())
+
+    DO_TEST("Empty payload test: ", zeroPayloadTest())
+
+    DO_TEST("Structured random ciphertext test: ", randomStructuredInvalidCiphertextTest(8))
+
+    DO_TEST("Unstructured random ciphertext test: ", randomUnstructuredInvalidCiphertextTest(100000))
 
     return 0;
 }

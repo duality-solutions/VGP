@@ -15,3 +15,9 @@ void use_shake256_rand()
     bdap_randominit = shake256_randominit;
     bdap_randombytes = shake256_randombytes;
 }
+
+void use_os_rand()
+{
+    bdap_randominit = os_randominit;
+    bdap_randombytes = os_randombytes;
+}

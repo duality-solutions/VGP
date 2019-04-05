@@ -66,11 +66,11 @@ LIBOBJS = obj/aes256.obj obj/aes256ctr.obj obj/aes256gcm.obj \
 	obj/ed25519.obj obj/fe.obj obj/ge.obj obj/os_rand.obj obj/rand.obj \
 	obj/sha512.obj obj/shake256.obj obj/shake256_rand.obj obj/utils.obj
 
-VGP_TESTOBJS = obj/encryption_test.obj
+VGP_TESTOBJS = obj/encryption_test.obj obj/vgp_assert.obj
 
 TESTOBJS = obj/aes256_test.obj obj/aes256ctr_test.obj obj/aes256gcm_test.obj \
 	obj/encryption_core_test.obj obj/curve25519_test.obj obj/convert_test.obj \
-	obj/shake256_test.obj obj/test.obj
+	obj/shake256_test.obj obj/vgp_assert.obj obj/test.obj
 
 # Executable targets
 
@@ -160,6 +160,9 @@ obj/convert_test.obj: test/convert_test.c include/curve25519.h include/ed25519.h
 
 obj/shake256_test.obj: test/shake256_test.c include/shake256_rand.h include/utils.h
 	$(CC) $(C_BUILD_FLAGS) $(OPENSSL_INC) test/shake256_test.c -o $@
+
+obj/vgp_assert.obj: test/vgp_assert.c include/utils.h
+	$(CC) $(C_BUILD_FLAGS) $(OPENSSL_INC) test/vgp_assert.c -o $@
 
 obj/test.obj: test/test.c include/shake256_rand.h
 	$(CC) $(C_BUILD_FLAGS) $(OPENSSL_INC) test/test.c -o $@

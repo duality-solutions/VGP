@@ -88,11 +88,19 @@ bool DecryptBDAPData(const CharVector& vchPrivKeySeed,
                      std::string& strErrorMessage)
 {
     bool status = false;
+    const char *error_message;
+
+    if (false == bdap_validate_ciphertext(vchCipherText.data(),
+                                          vchCipherText.size(),
+                                          &error_message))
+    {
+        strErrorMessage = error_message;
+        return false;
+    }
 
     size_t expectedDecryptedSize = BDAPExpectedDecryptedSize(vchCipherText);
     vchData.resize(expectedDecryptedSize);
 
-    const char *error_message;
     status = bdap_decrypt(vchData.data(),
                           vchPrivKeySeed.data(),
                           vchCipherText.data(),

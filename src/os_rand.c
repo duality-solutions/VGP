@@ -4,7 +4,7 @@
 #if defined(__APPLE__)
 # include <stdio.h>
 # include <unistd.h>
-#elif defined(WIN32)
+#elif defined(WIN32) || defined(_WIN32)
 # include <windows.h>
 # include <stdbool.h>
 # include <stdio.h>
@@ -22,7 +22,7 @@
 
 #define MAX_BUFFER_SIZE     1048576
 
-#if defined(WIN32)
+#if defined(WIN32) || defined(_WIN32)
 # define RtlGenRandom SystemFunction036
 # if defined(__cplusplus)
 extern "C"
@@ -58,7 +58,7 @@ void os_randombytes(uint8_t* buf, size_t buf_size)
             len = sz;
         }
 
-#if defined(WIN32)
+#if defined(WIN32) || defined(_WIN32)
 		if (false == RtlGenRandom((PVOID)buf, (ULONG)len))
 		{
 			fprintf_s(stderr, "Terminating process, RtlGenRandom failed\n\n");

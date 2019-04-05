@@ -18,5 +18,6 @@ const char* bdap_error_message[] =
     "AES-GCM encrypt failed",
     "AES-GCM decrypt failed",
     "Unable to find a valid recipient's encrypted secret",
-    "Memory protection failed"
+    "Memory protection failed",
+    "Invalid ciphertext"
 };

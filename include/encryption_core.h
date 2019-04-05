@@ -13,6 +13,20 @@ extern "C" {
 #endif
 
 /**
+ * @brief Evaluate the validity of a ciphertext 
+ * 
+ * @param ciphertext the ciphertext
+ * @param ciphertext_size the size of the ciphertext
+ * @param error_message the pointer to the error message
+ *                      in the event of error
+ * @return true if the ciphertext is valid
+ * @return false otherwise
+ */
+bool bdap_validate_ciphertext(const uint8_t* ciphertext,
+                              const size_t ciphertext_size,
+                              const char** error_message);
+
+/**
  * @brief Computes the ciphertext size in bytes for a given
  * number of recipients and plaintext size in bytes.
  * 
