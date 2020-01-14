@@ -30,7 +30,9 @@ extern "C"
 BOOLEAN NTAPI RtlGenRandom(PVOID RandomBuffer, ULONG RandomBufferLength);
 # pragma comment(lib, "advapi32.lib")
 
-typedef long long ssize_t;
+//typedef disabled due problems at mingw
+//typedef long long ssize_t;
+
 #endif
 
 void os_randominit(const uint8_t* seed, size_t seed_size)
