@@ -31,7 +31,7 @@ BOOLEAN NTAPI RtlGenRandom(PVOID RandomBuffer, ULONG RandomBufferLength);
 # pragma comment(lib, "advapi32.lib")
 
 #if !defined(ssize_t)
-typedef SSIZE_T ssize_t;
+typedef long long ssize_t;
 #endif
 
 #endif
