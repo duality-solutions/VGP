@@ -5,6 +5,7 @@
 # include <stdio.h>
 # include <unistd.h>
 #elif defined(WIN32) || defined(_WIN32)
+typedef long long ssize_t;
 # include <windows.h>
 # include <stdbool.h>
 # include <stdio.h>
@@ -29,17 +30,6 @@ extern "C"
 # endif
 BOOLEAN NTAPI RtlGenRandom(PVOID RandomBuffer, ULONG RandomBufferLength);
 # pragma comment(lib, "advapi32.lib")
-
-#ifdef _SSIZE_T_DEFINED
-#undef _SSIZE_T_DEFINED
-#define _SSIZE_T_DEFINED
-#undef ssize_t
-#ifdef _WIN64
-__MINGW_EXTENSION typedef __int64 ssize_t;
-#else
-typedef long long ssize_t;
-#endif /* _WIN64 */
-#endif /* _SSIZE_T_DEFINED */
 
 #endif
 
