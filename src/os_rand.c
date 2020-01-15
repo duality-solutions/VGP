@@ -5,7 +5,13 @@
 # include <stdio.h>
 # include <unistd.h>
 #elif defined(WIN32) || defined(_WIN32)
+
+//bypass crtdefs.h ssize_t typedef
+#ifndef _SSIZE_T_DEFINED
+#define _SSIZE_T_DEFINED
 typedef long long ssize_t;
+#endif /* _SSIZE_T_DEFINED */
+
 # include <windows.h>
 # include <stdbool.h>
 # include <stdio.h>
