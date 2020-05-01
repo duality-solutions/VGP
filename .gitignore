@@ -10,3 +10,10 @@ obj/
 *.lo
 .dirstamp
 .deps
+
+# visual studio
+*.user
+.vs/
+Debug/
+Release/
+x64/
