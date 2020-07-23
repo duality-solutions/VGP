@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>VGP</id>
+	<title>Very Good Privacy</title>
+    <version>20.7.22</version>
+    <authors>InvalidTag, HiddenField, Duality Blockchain Solutions</authors>
+    <owners>Duality Blockchain Solutions</owners>
+    <licenseUrl>https://github.com/duality-solutions/VGP/blob/master/LICENSE.md</licenseUrl>
+    <projectUrl>https://github.com/duality-solutions/VGP/</projectUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>A .NET wrapper to invoke a C++ implementation of the VGP encryption library.</description>
+    <releaseNotes>Initial NuGet implementation.</releaseNotes>
+    <copyright>Copyright 2020</copyright>
+    <tags>ed25519 curve25519 aes-ctr aes-gcm shake ephemeral key-exchange crypto cryptographic cryptography</tags>
+    <dependencies />
+  </metadata>
+  <files>
+    <file src="..\Release\vgp-lib.dll" target="net35\x64" />
+	  <file src="..\x64\Release\libvgp.dll" target="net35\x64" />
+  </files>
+</package>
