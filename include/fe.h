@@ -183,6 +183,13 @@ void fe_tobytes(uint8_t *s, const fe h);
  */
 bool fe_has_small_order(const uint8_t* p);
 
+// Added to support key exchange
+void fe_0(fe h);
+void fe_1(fe h);
+void fe_invert(fe out, const fe z);
+void fe_cswap(fe f, fe g, unsigned int b);
+void fe_sq(fe h, const fe f);
+
 #ifdef __cplusplus
 }
 #endif

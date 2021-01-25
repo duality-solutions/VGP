@@ -117,6 +117,9 @@ obj/fe.obj: src/fe.c include/fe.h include/utils.h
 obj/ge.obj: src/ge.c include/ge.h include/fe_25_5.h
 	$(CC) $(C_BUILD_FLAGS) src/ge.c -o $@
 
+obj/keyexchange.obj: src/keyexchange.c include/keyexchange.h include/fe.h
+	$(CC) $(C_BUILD_FLAGS) src/keyexchange.c -o $@
+
 obj/os_rand.obj: src/os_rand.c include/os_rand.h
 	$(CC) $(C_BUILD_FLAGS) src/os_rand.c -o $@
 

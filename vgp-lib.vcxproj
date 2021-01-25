@@ -143,6 +143,7 @@
     <ClInclude Include="include\fe.h" />
     <ClInclude Include="include\fe_25_5.h" />
     <ClInclude Include="include\ge.h" />
+    <ClInclude Include="include\keyexchange.h" />
     <ClInclude Include="include\os_rand.h" />
     <ClInclude Include="include\rand.h" />
     <ClInclude Include="include\sha512.h" />
@@ -161,6 +162,7 @@
     <ClCompile Include="src\encryption_error.c" />
     <ClCompile Include="src\fe.c" />
     <ClCompile Include="src\ge.c" />
+    <ClInclude Include="src\keyexchange.c" />
     <ClCompile Include="src\os_rand.c" />
     <ClCompile Include="src\rand.c" />
     <ClCompile Include="src\sha512.c" />
